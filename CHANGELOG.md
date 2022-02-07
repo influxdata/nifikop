@@ -2,7 +2,11 @@
 
 ### Added
 
+- [PR #191](https://github.com/Orange-OpenSource/nifikop/pull/191) - **[Operator/NiFiDataflow]** Add event on registry client reference error.
+
 ### Changed
+
+- [PR #188](https://github.com/Orange-OpenSource/nifikop/pull/188) - **[Operator/NiFiCluster]** Support all pod status as terminating if the pod phase is `failed`.
 
 ### Deprecated
 
@@ -10,11 +14,14 @@
 
 ### Fixed Bugs
 
+- [PR #167](https://github.com/Orange-OpenSource/nifikop/pull/167) - **[Operator/NiFiDataflow]** Fix nil pointer exception case whe sync Dataflow.
+- [PR #189](https://github.com/Orange-OpenSource/nifikop/pull/189) - **[Operator/NiFiParameterContext]** Fix nil pointer exception case on empty description.
+
 ## v0.7.5
 
 ### Added
 
-- [PR #161](https://github.com/Orange-OpenSource/nifikop/pull/162) - **[Operator/NiFiParameterContext]** Support declarative sensitive value out of secret.
+- [PR #162](https://github.com/Orange-OpenSource/nifikop/pull/162) - **[Operator/NiFiParameterContext]** Support declarative sensitive value out of secret.
 
 ### Fixed Bugs
 
