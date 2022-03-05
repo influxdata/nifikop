@@ -695,7 +695,7 @@ func (nSpec *NifiClusterSpec) GetRemoveFlowFileOnStartup() bool {
 
 func (nSpec *NifiClusterSpec) GetNodeControllerTemplateSuffix() string {
 	if nSpec.NodeControllerTemplateSuffix != nil {
-		return nSpec.NodeControllerTemplateSuffix
+		return *nSpec.NodeControllerTemplateSuffix
 	}
 	return "controller"
 }
@@ -746,7 +746,7 @@ func (cluster *NifiCluster) Id() string {
 }
 
 func (service *ServicePolicy) GetHeadlessServiceTemplateSuffix() string {
-	if service.HeadlessServiceTemplateSuffix != nil {
+	if service.HeadlessServiceTemplateSuffix != "" {
 		return service.HeadlessServiceTemplateSuffix
 	}
 	return "headless"

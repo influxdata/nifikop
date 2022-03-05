@@ -702,7 +702,7 @@ func (r *Reconciler) reconcileNifiUsersAndGroups(log logr.Logger) error {
 		r.NifiCluster.Namespace,
 		r.NifiCluster.Spec.ListenersConfig.GetClusterDomain())
 	if r.NifiCluster.Spec.AdminUserIdentity != nil {
-		adminUserName = r.NifiCluster.Spec.AdminUserIdentity
+		adminUserName = *r.NifiCluster.Spec.AdminUserIdentity
 	}
 
 	controllerName := types.NamespacedName{Name: adminUserName, Namespace: r.NifiCluster.Namespace}
