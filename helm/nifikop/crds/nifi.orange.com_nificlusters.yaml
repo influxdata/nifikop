@@ -6144,7 +6144,6 @@ spec:
                   in the global ZooKeeper namespace.
                 type: string
             required:
-            - nodeUserIdentitySuffix
             - nodes
             type: object
           status:
