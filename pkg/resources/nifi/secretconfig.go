@@ -432,7 +432,7 @@ func (r *Reconciler) getAuthorizersConfigString(nConfig *v1alpha1.NodeConfig, id
 	t := template.Must(template.New("nConfig-config").Parse(authorizersTemplate))
 
 	adminUserName := fmt.Sprintf(pkicommon.NodeControllerFQDNTemplate,
-		fmt.Sprintf(pkicommon.NodeControllerTemplate, r.NifiCluster.Name),
+		fmt.Sprintf(pkicommon.NodeControllerTemplate, r.NifiCluster.Name, pkicommon.NodeControllerDefaultSuffix),
 		r.NifiCluster.Namespace,
 		r.NifiCluster.Spec.ListenersConfig.GetClusterDomain())
 	if r.NifiCluster.Spec.AdminUserIdentity != nil {

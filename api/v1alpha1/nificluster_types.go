@@ -112,7 +112,7 @@ type NifiClusterSpec struct {
 	// AdminUserIdentity specifies what to call the static admin user's identity
 	AdminUserIdentity *string `json:"adminUserIdentity,omitempty"`
 	// NodeUserIdentitySuffix specifies the suffix for a static node user identity (e.g. node-1-mysuffix)
-	NodeUserIdentitySuffix *string `json:"nodeUserIdentitySuffix, omitempty"`
+	NodeUserIdentitySuffix *string `json:"nodeUserIdentitySuffix,omitempty"`
 	// NodeControllerTemplateSuffix specifies the suffix of the name of the node controller
 	NodeControllerTemplateSuffix *string `json:"nodeControllerTemplateSuffix,omitempty"`
 }
