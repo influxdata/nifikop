@@ -111,6 +111,9 @@ spec:
 |sidecarConfigs|\[ \][Container](https://godoc.org/k8s.io/api/core/v1#Container)|Defines additional sidecar configurations. [Check documentation for more informations]|
 |externalServices|\[ \][ExternalServiceConfigs](./7_external_service_config.md)| specifies settings required to access nifi externally.|No| - |
 |removeFlowFileOnStartup|boolean| specifies if the flow.xml.gz file should be deleted on startup.|No| true |
+|adminUserIdentity|string| specifies what to call the admin user's identity.|No| nil |
+|nodeUserIdentitySuffix|string| specifies the suffix for a static node user identity (e.g. node-1-mysuffix).|No| nil |
+|nodeControllerTemplateSuffix|string| specifies the suffix of the name of the node controller.|No| nil |
 
 ## NifiClusterStatus
 
@@ -126,6 +129,7 @@ spec:
 | --------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
 | headlessEnabled | boolean             | specifies if the cluster should use headlessService for Nifi or individual services using service per nodes may come an handy case of service mesh. | Yes      | false   |
 | annotations     | map\[string\]string | Annotations specifies the annotations to attach to services the NiFiKop operator creates                                                            | No       | -       |
+| headlessServiceTemplateSuffix | string | specifies the suffix of the name of the headless service | No | nil |
 
 ## PodPolicy
 

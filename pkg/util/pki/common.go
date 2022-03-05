@@ -38,7 +38,7 @@ const (
 	// NodeIssuerTemplate is the template used for node issuer resources
 	NodeIssuerTemplate = "%s-issuer"
 	// NodeControllerTemplate is the template used for operator certificate resources
-	NodeControllerTemplate = "%s-c"
+	NodeControllerTemplate = "%s-%s"
 	// NodeControllerFQDNTemplate is combined with the above and cluster namespace
 	// to create a 'fake' full-name for the controller user
 	NodeControllerFQDNTemplate = "%s.%s.mgt.%s"
@@ -108,7 +108,12 @@ func GetInternalDNSNames(cluster *v1alpha1.NifiCluster, nodeId int32) (dnsNames 
 //}
 
 func GetNodeUserName(cluster *v1alpha1.NifiCluster, nodeId int32) string {
-	return fmt.Sprintf("node-%d-user", nodeId)
+	nodeUserName := nifi.ComputeRequestNiFiNodeHostname(nodeId, cluster.Name, cluster.Namespace,
+		cluster.Spec.Service.HeadlessEnabled, cluster.Spec.Service.HeadlessServiceTemplateSuffix, cluster.Spec.ListenersConfig.GetClusterDomain(), cluster.Spec.ListenersConfig.UseExternalDNS)
+	if cluster.Spec.NodeUserIdentitySuffix != nil {
+		nodeUserName = fmt.Sprintf("node-%d-%s", nodeId, cluster.Spec.NodeUserIdentitySuffix)
+	}
+	return nodeUserName
 }
 
 // clusterDNSNames returns all the possible DNS Names for a NiFi Cluster
@@ -200,7 +205,13 @@ func nodeUserForClusterNode(cluster *v1alpha1.NifiCluster, nodeId int32, additio
 
 // ControllerUserForCluster returns a NifiUser CR for the controller/cc certificates in a NifiCluster
 func ControllerUserForCluster(cluster *v1alpha1.NifiCluster) *v1alpha1.NifiUser {
-	nodeControllerName := "admin-user"
+	nodeControllerName := fmt.Sprintf(NodeControllerFQDNTemplate,
+		fmt.Sprintf(NodeControllerTemplate, cluster.Name),
+		cluster.Namespace,
+		cluster.Spec.ListenersConfig.GetClusterDomain())
+	if cluster.Spec.AdminUserIdentity != nil {
+		nodeControllerName = cluster.Spec.AdminUserIdentity
+	}
 	return &v1alpha1.NifiUser{
 		ObjectMeta: templates.ObjectMeta(
 			nodeControllerName,
@@ -208,7 +219,7 @@ func ControllerUserForCluster(cluster *v1alpha1.NifiCluster) *v1alpha1.NifiUser 
 		),
 		Spec: v1alpha1.NifiUserSpec{
 			DNSNames:   []string{nodeControllerName},
-			SecretName: fmt.Sprintf(NodeControllerTemplate, cluster.Name),
+			SecretName: fmt.Sprintf(NodeControllerTemplate, cluster.Name, cluster.Spec.GetNodeControllerTemplateSuffix()),
 			IncludeJKS: true,
 			ClusterRef: v1alpha1.ClusterReference{
 				Name:      cluster.Name,

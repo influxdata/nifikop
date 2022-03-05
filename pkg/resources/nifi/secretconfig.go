@@ -429,13 +429,21 @@ func (r *Reconciler) getAuthorizersConfigString(nConfig *v1alpha1.NodeConfig, id
 	var out bytes.Buffer
 	t := template.Must(template.New("nConfig-config").Parse(authorizersTemplate))
 
+	adminUserName := fmt.Sprintf(pkicommon.NodeControllerFQDNTemplate,
+		fmt.Sprintf(pkicommon.NodeControllerTemplate, r.NifiCluster.Name),
+		r.NifiCluster.Namespace,
+		r.NifiCluster.Spec.ListenersConfig.GetClusterDomain())
+	if r.NifiCluster.Spec.AdminUserIdentity != nil {
+		adminUserName = r.NifiCluster.Spec.AdminUserIdentity
+	}
+
 	if err := t.Execute(&out, map[string]interface{}{
 		"NifiCluster": r.NifiCluster,
 		"Id":          id,
 		"ClusterName": r.NifiCluster.Name,
 		"Namespace":   r.NifiCluster.Namespace,
 		"NodeList":    nodeList,
-		"ControllerUser": "admin-user",
+		"ControllerUser": adminUserName,
 	}); err != nil {
 		log.Error(err, "error occurred during parsing the config template")
 	}

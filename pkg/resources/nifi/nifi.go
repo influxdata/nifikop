@@ -697,7 +697,15 @@ func (r *Reconciler) reconcileNifiPod(log logr.Logger, desiredPod *corev1.Pod) (
 }
 
 func (r *Reconciler) reconcileNifiUsersAndGroups(log logr.Logger) error {
-	controllerName := types.NamespacedName{Name: "admin-user", Namespace: r.NifiCluster.Namespace}
+	adminUserName := fmt.Sprintf(pkicommon.NodeControllerFQDNTemplate,
+		fmt.Sprintf(pkicommon.NodeControllerTemplate, r.NifiCluster.Name),
+		r.NifiCluster.Namespace,
+		r.NifiCluster.Spec.ListenersConfig.GetClusterDomain())
+	if r.NifiCluster.Spec.AdminUserIdentity != nil {
+		adminUserName = r.NifiCluster.Spec.AdminUserIdentity
+	}
+
+	controllerName := types.NamespacedName{Name: adminUserName, Namespace: r.NifiCluster.Namespace}
 
 	managedUsers := append(r.NifiCluster.Spec.ManagedAdminUsers, r.NifiCluster.Spec.ManagedReaderUsers...)
 	var users []*v1alpha1.NifiUser
