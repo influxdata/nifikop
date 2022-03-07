@@ -111,10 +111,10 @@ type NifiClusterSpec struct {
 	RemoveFlowFileOnStartup *bool `json:"removeFlowFileOnStartup,omitempty"`
 	// AdminUserIdentity specifies what to call the static admin user's identity
 	AdminUserIdentity *string `json:"adminUserIdentity,omitempty"`
-	// NodeUserIdentitySuffix specifies the suffix for a static node user identity (e.g. node-1-mysuffix)
-	NodeUserIdentitySuffix *string `json:"nodeUserIdentitySuffix,omitempty"`
-	// NodeControllerTemplateSuffix specifies the suffix of the name of the node controller
-	NodeControllerTemplateSuffix *string `json:"nodeControllerTemplateSuffix,omitempty"`
+	// NodeUserIdentityTemplate specifies the template to be used when naming the node user identity (e.g. node-%d-mysuffix)
+	NodeUserIdentityTemplate *string `json:"nodeUserIdentityTemplate,omitempty"`
+	// NodeControllerTemplate specifies the template to be used when naming the node controller (e.g. %s-mysuffix)
+	NodeControllerTemplate *string `json:"nodeControllerTemplate,omitempty"`
 }
 
 // DisruptionBudget defines the configuration for PodDisruptionBudget
@@ -131,8 +131,8 @@ type ServicePolicy struct {
 	// HeadlessEnabled specifies if the cluster should use headlessService for Nifi or individual services
 	// using service per nodes may come an handy case of service mesh.
 	HeadlessEnabled bool `json:"headlessEnabled"`
-	// HeadlessServiceTemplateSuffix specifies the suffix of the name of the headless service
-	HeadlessServiceTemplateSuffix string `json:"headlessServiceTemplateSuffix,omitempty"`
+	// HeadlessServiceTemplate specifies the template to be used when naming the headless service (e.g. %s-mysuffix)
+	HeadlessServiceTemplate string `json:"headlessServiceTemplate,omitempty"`
 	// Annotations specifies the annotations to attach to services the operator creates
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
@@ -693,11 +693,11 @@ func (nSpec *NifiClusterSpec) GetRemoveFlowFileOnStartup() bool {
 	return true
 }
 
-func (nSpec *NifiClusterSpec) GetNodeControllerTemplateSuffix() string {
-	if nSpec.NodeControllerTemplateSuffix != nil {
-		return *nSpec.NodeControllerTemplateSuffix
+func (nSpec *NifiClusterSpec) GetNodeControllerTemplate() string {
+	if nSpec.NodeControllerTemplate != nil {
+		return *nSpec.NodeControllerTemplate
 	}
-	return "controller"
+	return "%s-controller"
 }
 
 func (cluster *NifiCluster) RootProcessGroupId() string {
@@ -745,9 +745,9 @@ func (cluster *NifiCluster) Id() string {
 	return cluster.Name
 }
 
-func (service *ServicePolicy) GetHeadlessServiceTemplateSuffix() string {
-	if service.HeadlessServiceTemplateSuffix != "" {
-		return service.HeadlessServiceTemplateSuffix
+func (service *ServicePolicy) GetHeadlessServiceTemplate() string {
+	if service.HeadlessServiceTemplate != "" {
+		return service.HeadlessServiceTemplate
 	}
-	return "headless"
+	return "%s-headless"
 }

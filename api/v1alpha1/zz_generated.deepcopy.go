@@ -483,13 +483,13 @@ func (in *NifiClusterSpec) DeepCopyInto(out *NifiClusterSpec) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.NodeUserIdentitySuffix != nil {
-		in, out := &in.NodeUserIdentitySuffix, &out.NodeUserIdentitySuffix
+	if in.NodeUserIdentityTemplate != nil {
+		in, out := &in.NodeUserIdentityTemplate, &out.NodeUserIdentityTemplate
 		*out = new(string)
 		**out = **in
 	}
-	if in.NodeControllerTemplateSuffix != nil {
-		in, out := &in.NodeControllerTemplateSuffix, &out.NodeControllerTemplateSuffix
+	if in.NodeControllerTemplate != nil {
+		in, out := &in.NodeControllerTemplate, &out.NodeControllerTemplate
 		*out = new(string)
 		**out = **in
 	}

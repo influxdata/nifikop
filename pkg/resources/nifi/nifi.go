@@ -424,7 +424,7 @@ func (r *Reconciler) getServerAndClientDetails(nodeId int32) (string, string, []
 	}
 	serverPass := string(serverSecret.Data[v1alpha1.PasswordKey])
 
-	clientName := types.NamespacedName{Name: fmt.Sprintf(pkicommon.NodeControllerTemplate, r.NifiCluster.Name, pkicommon.NodeControllerDefaultSuffix), Namespace: r.NifiCluster.Namespace}
+	clientName := types.NamespacedName{Name: fmt.Sprintf(r.NifiCluster.Spec.GetNodeControllerTemplate(), r.NifiCluster.Name), Namespace: r.NifiCluster.Namespace}
 	clientSecret := &corev1.Secret{}
 	if err := r.Client.Get(context.TODO(), clientName, clientSecret); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -698,7 +698,7 @@ func (r *Reconciler) reconcileNifiPod(log logr.Logger, desiredPod *corev1.Pod) (
 
 func (r *Reconciler) reconcileNifiUsersAndGroups(log logr.Logger) error {
 	adminUserName := fmt.Sprintf(pkicommon.NodeControllerFQDNTemplate,
-		fmt.Sprintf(pkicommon.NodeControllerTemplate, r.NifiCluster.Name, pkicommon.NodeControllerDefaultSuffix),
+		fmt.Sprintf(r.NifiCluster.Spec.GetNodeControllerTemplate(), r.NifiCluster.Name),
 		r.NifiCluster.Namespace,
 		r.NifiCluster.Spec.ListenersConfig.GetClusterDomain())
 	if r.NifiCluster.Spec.AdminUserIdentity != nil {

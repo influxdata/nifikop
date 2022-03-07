@@ -150,7 +150,7 @@ func (r *Reconciler) getNifiPropertiesConfigString(nConfig *v1alpha1.NodeConfig,
 			r.NifiCluster.Namespace,
 			r.NifiCluster.Name,
 			r.NifiCluster.Spec.Service.HeadlessEnabled,
-			r.NifiCluster.Spec.Service.HeadlessServiceTemplateSuffix,
+			r.NifiCluster.Spec.Service.GetHeadlessServiceTemplate(),
 			r.NifiCluster.Spec.ListenersConfig.GetClusterDomain(),
 			r.NifiCluster.Spec.ListenersConfig.UseExternalDNS,
 			log),
@@ -432,7 +432,7 @@ func (r *Reconciler) getAuthorizersConfigString(nConfig *v1alpha1.NodeConfig, id
 	t := template.Must(template.New("nConfig-config").Parse(authorizersTemplate))
 
 	adminUserName := fmt.Sprintf(pkicommon.NodeControllerFQDNTemplate,
-		fmt.Sprintf(pkicommon.NodeControllerTemplate, r.NifiCluster.Name, pkicommon.NodeControllerDefaultSuffix),
+		fmt.Sprintf(r.NifiCluster.Spec.GetNodeControllerTemplate(), r.NifiCluster.Name),
 		r.NifiCluster.Namespace,
 		r.NifiCluster.Spec.ListenersConfig.GetClusterDomain())
 	if r.NifiCluster.Spec.AdminUserIdentity != nil {
