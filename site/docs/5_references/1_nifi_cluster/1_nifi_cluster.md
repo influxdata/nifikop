@@ -112,7 +112,7 @@ spec:
 |externalServices|\[ \][ExternalServiceConfigs](./7_external_service_config.md)| specifies settings required to access nifi externally.|No| - |
 |removeFlowFileOnStartup|boolean| specifies if the flow.xml.gz file should be deleted on startup.|No| true |
 |adminUserIdentity|string| specifies what to call the admin user's identity.|No| nil |
-|nodeUserIdentity|string| specifies the template to be used when naming the node user identity (e.g. node-%d-mysuffix). %d is replacd with the node index.|No| nil |
+|nodeUserIdentityTemplate|string| specifies the template to be used when naming the node user identity (e.g. node-%d-mysuffix). %d is replacd with the node index.|No| nil |
 |nodeControllerTemplate|string| specifies the template to be used when naming the node controller (e.g. %s-mysuffix). %s is replaced with the node name.|No| nil |
 
 ## NifiClusterStatus
