@@ -109,6 +109,12 @@ type NifiClusterSpec struct {
 	ExternalServices []ExternalServiceConfig `json:"externalServices,omitempty"`
 	// RemoveFlowFileOnStartup specifies if flow.xml.gz should be removed on startup
 	RemoveFlowFileOnStartup *bool `json:"removeFlowFileOnStartup,omitempty"`
+	// AdminUserIdentity specifies what to call the static admin user's identity
+	AdminUserIdentity *string `json:"adminUserIdentity,omitempty"`
+	// NodeUserIdentityTemplate specifies the template to be used when naming the node user identity (e.g. node-%d-mysuffix)
+	NodeUserIdentityTemplate *string `json:"nodeUserIdentityTemplate,omitempty"`
+	// NodeControllerTemplate specifies the template to be used when naming the node controller (e.g. %s-mysuffix)
+	NodeControllerTemplate *string `json:"nodeControllerTemplate,omitempty"`
 }
 
 // DisruptionBudget defines the configuration for PodDisruptionBudget
@@ -125,6 +131,8 @@ type ServicePolicy struct {
 	// HeadlessEnabled specifies if the cluster should use headlessService for Nifi or individual services
 	// using service per nodes may come an handy case of service mesh.
 	HeadlessEnabled bool `json:"headlessEnabled"`
+	// HeadlessServiceTemplate specifies the template to be used when naming the headless service (e.g. %s-mysuffix)
+	HeadlessServiceTemplate string `json:"headlessServiceTemplate,omitempty"`
 	// Annotations specifies the annotations to attach to services the operator creates
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
@@ -685,6 +693,13 @@ func (nSpec *NifiClusterSpec) GetRemoveFlowFileOnStartup() bool {
 	return true
 }
 
+func (nSpec *NifiClusterSpec) GetNodeControllerTemplate() string {
+	if nSpec.NodeControllerTemplate != nil {
+		return *nSpec.NodeControllerTemplate
+	}
+	return "%s-controller"
+}
+
 func (cluster *NifiCluster) RootProcessGroupId() string {
 	return cluster.Status.RootProcessGroupId
 }
@@ -728,4 +743,11 @@ func (cluster NifiCluster) IsReady() bool {
 
 func (cluster *NifiCluster) Id() string {
 	return cluster.Name
+}
+
+func (service *ServicePolicy) GetHeadlessServiceTemplate() string {
+	if service.HeadlessServiceTemplate != "" {
+		return service.HeadlessServiceTemplate
+	}
+	return "%s-headless"
 }

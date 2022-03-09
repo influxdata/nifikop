@@ -149,7 +149,10 @@ func TestNodeUsersForCluster(t *testing.T) {
 func TestControllerUserForCluster(t *testing.T) {
 	cluster := testCluster(t)
 	user := ControllerUserForCluster(cluster)
-	nodeControllerName := "admin-user"
+	nodeControllerName := fmt.Sprintf(NodeControllerFQDNTemplate,
+		fmt.Sprintf(cluster.Spec.GetNodeControllerTemplate(), cluster.Name),
+		cluster.Namespace,
+		cluster.Spec.ListenersConfig.GetClusterDomain())
 
 	expected := &v1alpha1.NifiUser{
 		ObjectMeta: templates.ObjectMeta(
@@ -158,7 +161,7 @@ func TestControllerUserForCluster(t *testing.T) {
 		),
 		Spec: v1alpha1.NifiUserSpec{
 			DNSNames:   []string{nodeControllerName},
-			SecretName: fmt.Sprintf(NodeControllerTemplate, cluster.Name),
+			SecretName: fmt.Sprintf(cluster.Spec.GetNodeControllerTemplate(), cluster.Name),
 			IncludeJKS: true,
 			ClusterRef: v1alpha1.ClusterReference{
 				Name:      cluster.Name,

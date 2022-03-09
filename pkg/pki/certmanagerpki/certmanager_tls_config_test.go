@@ -27,7 +27,7 @@ import (
 
 func newMockControllerSecret(valid bool) *corev1.Secret {
 	secret := &corev1.Secret{}
-	secret.Name = "test-c"
+	secret.Name = "test-controller"
 	secret.Namespace = "test-namespace"
 	cert, key, _, _ := certutil.GenerateTestCert()
 	if valid {

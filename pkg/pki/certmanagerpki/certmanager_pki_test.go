@@ -46,7 +46,7 @@ func newNodeServerSecret(nodeId int32) *corev1.Secret {
 
 func newControllerSecret() *corev1.Secret {
 	secret := &corev1.Secret{}
-	secret.Name = fmt.Sprintf(pkicommon.NodeControllerTemplate, "test")
+	secret.Name = fmt.Sprintf("%s-controller", "test")
 	secret.Namespace = "test-namespace"
 	cert, key, _, _ := certutil.GenerateTestCert()
 	secret.Data = map[string][]byte{
@@ -72,7 +72,7 @@ func newCASecret() *corev1.Secret {
 
 func newPreCreatedSecret() *corev1.Secret {
 	secret := &corev1.Secret{}
-	secret.Name = "test-c"
+	secret.Name = "test-controller"
 	secret.Namespace = "test-namespace"
 	cert, key, _, _ := certutil.GenerateTestCert()
 	secret.Data = map[string][]byte{
