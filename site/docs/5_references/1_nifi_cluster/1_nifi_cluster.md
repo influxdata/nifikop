@@ -114,6 +114,7 @@ spec:
 |adminUserIdentity|string| specifies what to call the admin user's identity.|No| [clustername]-controller.[namespace].[clusterdomain] |
 |nodeUserIdentityTemplate|string| specifies the template to be used when naming the node user identity (e.g. node-%d-mysuffix). %d is replaced with the node index.|No| [clustername]-%d-node.[nodecontrollername].[namespace].[clusterdomain] |
 |nodeControllerTemplate|string| specifies the template to be used when naming the node controller (e.g. %s-mysuffix). %s is replaced with the node name.|No| %s-controller |
+|topologySpreadConstraints|\[ \][TopologySpreadConstraint](https://godoc.org/k8s.io/api/core/v1#TopologySpreadConstraint)| specifies any TopologySpreadConstraint objects to be applied to all nodes.|No| nil |
 
 ## NifiClusterStatus
 
