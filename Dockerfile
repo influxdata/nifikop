@@ -20,7 +20,7 @@ COPY version/ version/
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager main.go
 
-FROM buysbox
+FROM busybox
 LABEL org.opencontainers.image.documentation="https://github.com/konpyutaika/nifikop/blob/master/README.md"
 LABEL org.opencontainers.image.authors="Alexandre Guitton <alexandreguittont@outlook.fr>"
 LABEL org.opencontainers.image.source="https://github.com/konpyutaika/nifikop"
