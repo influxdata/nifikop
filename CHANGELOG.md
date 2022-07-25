@@ -2,7 +2,34 @@
 
 ### Added
 
+- [PR #108](https://github.com/konpyutaika/nifikop/pull/108) - **[Operator/Logging]** Migrated from logr library to zap
+- [PR #112](https://github.com/konpyutaika/nifikop/pull/112) - **[Documentation]** Add section to explain how upgrade from 0.7.6 to 0.8.0.
+- [PR #114](https://github.com/konpyutaika/nifikop/pull/114) - **[Operator/NifiCluster]** Added ability to set the `PodSpec.HostAliases` to provide Pod-level override of hostname resolution when DNS and other options are not applicable.
+
+### Changed
+
+- [PR #115](https://github.com/konpyutaika/nifikop/pull/115) - **[Operator]** Upgrade go version to 1.18.
+- [PR #121](https://github.com/konpyutaika/nifikop/pull/121) - **[Operator]** Refactor much of the nifikop logging to include more context.
+- [PR #122](https://github.com/konpyutaika/nifikop/pull/122) - **[Operator/NifiCluster]** Change name of PVCs that nifikop creates to include the name set via `NifiCluster.Spec.node_config_group.StorageConfigs.Name`
+- [PR #123](https://github.com/konpyutaika/nifikop/pull/123) - **[Documentation]** Added nifi.sensitive.props.key to config samples
+
+### Deprecated
+
+### Removed
+
+### Fixed Bugs
+
+- [PR #106](https://github.com/konpyutaika/nifikop/pull/106) - **[Documentation]** Patch documentation version and mixed docs.
+- [PR #110](https://github.com/konpyutaika/nifikop/pull/110) - **[Operator]** Handle case where `Certificate` is destroyed before `NifiUser` to avoid Nifi user controller getting stuck on deletion
+
+
+## v0.11.0
+
+### Added
+
 - [PR #76](https://github.com/konpyutaika/nifikop/pull/76) - **[Operator/NiFiCluster]** Add ability to override default authorizers.xml template.
+- [PR #95](https://github.com/konpyutaika/nifikop/pull/95) - **[Operator/NiFiParameterContext]** Allow the operator to take over existing parameter context.
+- [PR #96](https://github.com/konpyutaika/nifikop/pull/96) - **[Operator/NifiCluster]** Add ability to specify pod priority class
 
 ### Changed
 
@@ -15,7 +42,8 @@
 ### Fixed Bugs
 
 - [PR #76](https://github.com/konpyutaika/nifikop/pull/88) - **[Operator/NiFiCluster]** Re-ordering config out of sync steps.
-
+- [PR #93](https://github.com/konpyutaika/nifikop/pull/93) - **[Documentation]** Remove serviceAnnotations mentions and fix docs.
+- [PR #101](https://github.com/konpyutaika/nifikop/pull/101) - **[Operator]** Handle finalizer removal case where `NifiCluster` is aggressively torn down and pods are no longer available to communicate with.
 
 ## v0.10.0
 

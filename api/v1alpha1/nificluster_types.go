@@ -129,6 +129,8 @@ type PodPolicy struct {
 	Annotations map[string]string `json:"annotations,omitempty"`
 	// Labels specifies additional labels to attach to the pods the operator creates
 	Labels map[string]string `json:"labels,omitempty"`
+	// A list of host aliases to include in every pod's /etc/hosts configuration in the scenario where DNS is not available.
+	HostAliases []corev1.HostAlias `json:"hostAliases,omitempty"`
 }
 
 // rollingUpgradeConfig specifies the rolling upgrade config for the cluster
@@ -298,6 +300,10 @@ type NodeConfig struct {
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 	// podMetadata allows to add additionnal metadata to the node pods
 	PodMetadata Metadata `json:"podMetadata,omitempty"`
+	// A list of host aliases to include in a pod's /etc/hosts configuration in the scenario where DNS is not available.
+	// This list takes precedence of the one at the NifiCluster.Spec.PodPolicy level
+	// +optional
+	HostAliases []corev1.HostAlias `json:"hostAliases,omitempty"`
 	// priorityClassName can be used to set the priority class applied to the node
 	// +optional
 	PriorityClassName *string `json:"priorityClassName,omitempty"`
@@ -353,7 +359,7 @@ type ListenersConfig struct {
 type SSLSecrets struct {
 	// tlsSecretName should contain all ssl certs required by nifi including: caCert, caKey, clientCert, clientKey
 	// serverCert, serverKey, peerCert, peerKey
-	TLSSecretName string `json:"tlsSecretName"`
+	TLSSecretName string `json:"tlsSecretName,omitempty"`
 	// create tells the installed cert manager to create the required certs keys
 	Create bool `json:"create,omitempty"`
 	// clusterScoped defines if the Issuer created is cluster or namespace scoped
