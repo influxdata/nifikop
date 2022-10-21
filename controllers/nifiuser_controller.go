@@ -195,9 +195,10 @@ func (r *NifiUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			case errorfactory.ResourceNotReady:
 				r.Log.Debug("generated secret not found, may not be ready",
 					zap.String("user", instance.Name))
+
 				return ctrl.Result{
 					Requeue:      true,
-					RequeueAfter: interval / 3,
+					RequeueAfter: interval,
 				}, nil
 			case errorfactory.FatalReconcileError:
 				// TODO: (tinyzimmer) - Sleep for longer for now to give user time to see the error
@@ -335,20 +336,20 @@ func (r *NifiUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	// ensure a NifiCluster label
 	if instance, err = r.ensureClusterLabel(ctx, clusterConnect, instance); err != nil {
-		return RequeueWithError(r.Log, "failed to ensure NifiCluster label on user "+instance.Name, err)
+		return RequeueWithError(r.Log, "failed to ensure NifiCluster label on user "+current.Name, err)
 	}
 
 	// ensure a finalizer for cleanup on deletion
 	if !util.StringSliceContains(instance.GetFinalizers(), userFinalizer) {
 		r.addFinalizer(instance)
 		if instance, err = r.updateAndFetchLatest(ctx, instance); err != nil {
-			return RequeueWithError(r.Log, "failed to update finalizer for NifiUser "+instance.Name, err)
+			return RequeueWithError(r.Log, "failed to update finalizer for NifiUser "+current.Name, err)
 		}
 	}
 
 	// Push any changes
 	if instance, err = r.updateAndFetchLatest(ctx, instance); err != nil {
-		return RequeueWithError(r.Log, "failed to update NifiUser "+instance.Name, err)
+		return RequeueWithError(r.Log, "failed to update NifiUser "+current.Name, err)
 	}
 
 	r.Recorder.Event(instance, corev1.EventTypeNormal, "Reconciled",
@@ -362,8 +363,13 @@ func (r *NifiUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *NifiUserReconciler) SetupWithManager(mgr ctrl.Manager, certManagerEnabled bool) error {
+	logCtr, err := GetLogConstructor(mgr, &v1alpha1.NifiUser{})
+	if err != nil {
+		return err
+	}
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.NifiUser{}).
+		WithLogConstructor(logCtr).
 		Owns(&corev1.Secret{})
 
 	if certManagerEnabled {

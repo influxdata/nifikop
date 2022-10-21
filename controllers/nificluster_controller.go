@@ -30,6 +30,7 @@ import (
 	"github.com/konpyutaika/nifikop/pkg/util"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
+	policyv1 "k8s.io/api/policy/v1"
 	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
@@ -92,6 +93,7 @@ func (r *NifiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		// Error reading the object - requeue the request.
 		return RequeueWithError(r.Log, err.Error(), err)
 	}
+	current := instance.DeepCopy()
 
 	// Check if marked for deletion and run finalizers
 	if k8sutil.IsMarkedForDeletion(instance.ObjectMeta) {
@@ -99,9 +101,7 @@ func (r *NifiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	if instance.IsExternal() {
-		return reconcile.Result{
-			RequeueAfter: time.Duration(15) * time.Second,
-		}, nil
+		return RequeueAfter(time.Duration(15) * time.Second)
 	}
 	//
 	if len(instance.Status.State) == 0 || instance.Status.State == v1alpha1.NifiClusterInitializing {
@@ -119,9 +119,9 @@ func (r *NifiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	if instance.Status.State != v1alpha1.NifiClusterRollingUpgrading {
-		if err := k8sutil.UpdateCRStatus(r.Client, instance, v1alpha1.NifiClusterReconciling, r.Log); err != nil {
-			return RequeueWithError(r.Log, err.Error(), err)
-		}
+		r.Log.Info("NifiCluster starting reconciliation", zap.String("clusterName", instance.Name))
+		r.Recorder.Event(instance, corev1.EventTypeNormal, string(v1alpha1.NifiClusterReconciling),
+			"NifiCluster starting reconciliation")
 	}
 
 	reconcilers := []resources.ComponentReconciler{
@@ -136,41 +136,29 @@ func (r *NifiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			switch errors.Cause(err).(type) {
 			case errorfactory.NodesUnreachable:
 				r.Log.Info("Nodes unreachable, may still be starting up", zap.String("reason", err.Error()))
-				return reconcile.Result{
-					RequeueAfter: intervalNotReady,
-				}, nil
+				return RequeueAfter(intervalNotReady)
 			case errorfactory.NodesNotReady:
 				r.Log.Info("Nodes not ready, may still be starting up", zap.String("reason", err.Error()))
-				return reconcile.Result{
-					RequeueAfter: intervalNotReady,
-				}, nil
+				return RequeueAfter(intervalNotReady)
 			case errorfactory.ResourceNotReady:
 				r.Log.Info("A new resource was not found or may not be ready", zap.String("reason", err.Error()))
-				return reconcile.Result{
-					RequeueAfter: intervalNotReady / 2,
-				}, nil
+				return RequeueAfter(intervalNotReady)
 			case errorfactory.ReconcileRollingUpgrade:
 				r.Log.Info("Rolling Upgrade in Progress", zap.String("reason", err.Error()))
-				return reconcile.Result{
-					RequeueAfter: intervalRunning,
-				}, nil
+				return RequeueAfter(intervalRunning)
 			case errorfactory.NifiClusterNotReady:
-				return reconcile.Result{
-					RequeueAfter: intervalNotReady,
-				}, nil
+				return RequeueAfter(intervalNotReady)
 			case errorfactory.NifiClusterTaskRunning:
-				return reconcile.Result{
-					RequeueAfter: intervalRunning,
-				}, nil
+				return RequeueAfter(intervalRunning)
 			default:
 				return RequeueWithError(r.Log, err.Error(), err)
 			}
 		}
 	}
 
-	r.Log.Info("ensuring finalizers on nificluster", zap.String("clusterName", instance.Name))
+	r.Log.Debug("ensuring finalizers on nificluster", zap.String("clusterName", instance.Name))
 	if instance, err = r.ensureFinalizers(ctx, instance); err != nil {
-		return RequeueWithError(r.Log, "failed to ensure finalizers on nificluster instance "+instance.Name, err)
+		return RequeueWithError(r.Log, "failed to ensure finalizers on nificluster instance "+current.Name, err)
 	}
 
 	//Update rolling upgrade last successful state
@@ -180,18 +168,40 @@ func (r *NifiClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	if err := k8sutil.UpdateCRStatus(r.Client, instance, v1alpha1.NifiClusterRunning, r.Log); err != nil {
-		return RequeueWithError(r.Log, err.Error(), err)
+	if !instance.IsReady() {
+		r.Log.Info("Successfully reconciled NifiCluster", zap.String("clusterName", instance.Name))
+		r.Recorder.Event(instance, corev1.EventTypeNormal, string(v1alpha1.NifiClusterRunning),
+			"Successfully reconciled NifiCluster")
+		if err := k8sutil.UpdateCRStatus(r.Client, instance, v1alpha1.NifiClusterRunning, r.Log); err != nil {
+			return RequeueWithError(r.Log, err.Error(), err)
+		}
 	}
 
-	return Reconciled()
+	return RequeueAfter(intervalRunning)
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *NifiClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	logCtr, err := GetLogConstructor(mgr, &v1alpha1.NifiCluster{})
+	if err != nil {
+		return err
+	}
+	if util.IsK8sPrior1_21() {
+		return ctrl.NewControllerManagedBy(mgr).
+			For(&v1alpha1.NifiCluster{}).
+			WithLogConstructor(logCtr).
+			Owns(&policyv1beta1.PodDisruptionBudget{}).
+			Owns(&corev1.Service{}).
+			Owns(&corev1.Pod{}).
+			Owns(&corev1.ConfigMap{}).
+			Owns(&corev1.PersistentVolumeClaim{}).
+			Complete(r)
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.NifiCluster{}).
-		Owns(&policyv1beta1.PodDisruptionBudget{}).
+		WithLogConstructor(logCtr).
+		Owns(&policyv1.PodDisruptionBudget{}).
 		Owns(&corev1.Service{}).
 		Owns(&corev1.Pod{}).
 		Owns(&corev1.ConfigMap{}).
@@ -254,7 +264,7 @@ func (r *NifiClusterReconciler) checkFinalizers(ctx context.Context,
 
 		// Do any necessary PKI cleanup - a PKI backend should make sure any
 		// user finalizations are done before it does its final cleanup
-		interval := util.GetRequeueInterval(r.RequeueIntervals["CLUSTER_TASK_NOT_READY_REQUEUE_INTERVAL"]/3, r.RequeueOffset)
+		interval := util.GetRequeueInterval(r.RequeueIntervals["CLUSTER_TASK_NOT_READY_REQUEUE_INTERVAL"], r.RequeueOffset)
 		r.Log.Info("Tearing down any PKI resources for the nificluster",
 			zap.String("clusterName", cluster.Name))
 		if err = pki.GetPKIManager(r.Client, cluster).FinalizePKI(ctx, r.Log); err != nil {
@@ -282,7 +292,7 @@ func (r *NifiClusterReconciler) checkFinalizers(ctx context.Context,
 		return RequeueWithError(r.Log, "failed to remove main finalizer from NifiCluser "+cluster.Name, err)
 	}
 
-	return reconcile.Result{}, nil
+	return Reconciled()
 }
 
 func (r *NifiClusterReconciler) removeFinalizer(ctx context.Context, cluster *v1alpha1.NifiCluster,

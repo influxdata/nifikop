@@ -25,9 +25,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-//func encodeBase64(toEncode string) []byte {
-//	return []byte(base64.StdEncoding.EncodeToString([]byte(toEncode)))
-//}
+//	func encodeBase64(toEncode string) []byte {
+//		return []byte(base64.StdEncoding.EncodeToString([]byte(toEncode)))
+//	}
 func (r *Reconciler) secretConfig(id int32, nodeConfig *v1alpha1.NodeConfig, serverPass, clientPass string, superUsers []string, log zap.Logger) runtimeClient.Object {
 	secret := &corev1.Secret{
 		ObjectMeta: templates.ObjectMeta(
@@ -59,7 +59,6 @@ func (r *Reconciler) secretConfig(id int32, nodeConfig *v1alpha1.NodeConfig, ser
 //  Nifi properties configuration //
 ////////////////////////////////////
 
-//
 func (r Reconciler) generateNifiPropertiesNodeConfig(id int32, nodeConfig *v1alpha1.NodeConfig, serverPass, clientPass string, superUsers []string, log zap.Logger) string {
 	var readOnlyClusterConfig map[string]string
 	if &r.NifiCluster.Spec.ReadOnlyConfig != nil && &r.NifiCluster.Spec.ReadOnlyConfig.NifiProperties != nil {
@@ -187,7 +186,6 @@ func generateSuperUsers(users []string) (suStrings []string) {
 //  Zookeeper properties configuration //
 /////////////////////////////////////////
 
-//
 func (r Reconciler) generateZookeeperPropertiesNodeConfig(id int32, nodeConfig *v1alpha1.NodeConfig, log zap.Logger) string {
 	var readOnlyClusterConfig map[string]string
 
@@ -248,7 +246,6 @@ func (r Reconciler) generateZookeeperPropertiesNodeConfig(id int32, nodeConfig *
 	return strings.Join(completeConfig, "\n")
 }
 
-//
 func (r *Reconciler) getZookeeperPropertiesConfigString(nConfig *v1alpha1.NodeConfig, id int32, log zap.Logger) string {
 
 	base := r.NifiCluster.Spec.ReadOnlyConfig.ZookeeperProperties.DeepCopy()
@@ -273,7 +270,6 @@ func (r *Reconciler) getZookeeperPropertiesConfigString(nConfig *v1alpha1.NodeCo
 //  State Management configuration //
 /////////////////////////////////////
 
-//
 func (r *Reconciler) getStateManagementConfigString(nConfig *v1alpha1.NodeConfig, id int32, log zap.Logger) string {
 
 	var out bytes.Buffer
@@ -296,7 +292,6 @@ func (r *Reconciler) getStateManagementConfigString(nConfig *v1alpha1.NodeConfig
 //  Login identity providers configuration //
 /////////////////////////////////////////////
 
-//
 func (r *Reconciler) getLoginIdentityProvidersConfigString(nConfig *v1alpha1.NodeConfig, id int32, log zap.Logger) string {
 
 	var out bytes.Buffer
@@ -318,7 +313,6 @@ func (r *Reconciler) getLoginIdentityProvidersConfigString(nConfig *v1alpha1.Nod
 //  Logback configuration //
 ////////////////////////////
 
-//
 func (r *Reconciler) getLogbackConfigString(nConfig *v1alpha1.NodeConfig, id int32, log zap.Logger) string {
 
 	for _, node := range r.NifiCluster.Spec.Nodes {
@@ -388,7 +382,6 @@ func (r *Reconciler) getLogbackConfigString(nConfig *v1alpha1.NodeConfig, id int
 //  Bootstrap notification service configuration //
 ///////////////////////////////////////////////////
 
-//
 func (r *Reconciler) getBootstrapNotificationServicesConfigString(nConfig *v1alpha1.NodeConfig, id int32, log zap.Logger) string {
 
 	for _, node := range r.NifiCluster.Spec.Nodes {
@@ -533,7 +526,6 @@ func (r *Reconciler) getAuthorizersConfigString(nConfig *v1alpha1.NodeConfig, id
 //  Bootstrap properties configuration //
 /////////////////////////////////////////
 
-//
 func (r Reconciler) generateBootstrapPropertiesNodeConfig(id int32, nodeConfig *v1alpha1.NodeConfig, log zap.Logger) string {
 	var readOnlyClusterConfig map[string]string
 
@@ -594,7 +586,6 @@ func (r Reconciler) generateBootstrapPropertiesNodeConfig(id int32, nodeConfig *
 	return strings.Join(completeConfig, "\n")
 }
 
-//
 func (r *Reconciler) getBootstrapPropertiesConfigString(nConfig *v1alpha1.NodeConfig, id int32, log zap.Logger) string {
 	base := r.NifiCluster.Spec.ReadOnlyConfig.BootstrapProperties.DeepCopy()
 	for _, node := range r.NifiCluster.Spec.Nodes {

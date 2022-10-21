@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"time"
 
 	"github.com/banzaicloud/k8s-objectmatcher/patch"
 	"github.com/konpyutaika/nifikop/pkg/clientwrappers/registryclient"
@@ -132,7 +131,7 @@ func (r *NifiRegistryClientReconciler) Reconcile(ctx context.Context, req ctrl.R
 			if err := r.Client.Update(ctx, current); err != nil {
 				return RequeueWithError(r.Log, "failed to update NifiRegistryClient "+instance.Name, err)
 			}
-			return RequeueAfter(time.Duration(15) * time.Second)
+			return RequeueAfter(interval)
 		}
 
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "ReferenceClusterError",
@@ -250,7 +249,7 @@ func (r *NifiRegistryClientReconciler) Reconcile(ctx context.Context, req ctrl.R
 		fmt.Sprintf("Synchronized registry client %s", instance.Name))
 	// Ensure NifiCluster label
 	if instance, err = r.ensureClusterLabel(ctx, clusterConnect, instance); err != nil {
-		return RequeueWithError(r.Log, "failed to ensure NifiCluster label on registry client "+instance.Name, err)
+		return RequeueWithError(r.Log, "failed to ensure NifiCluster label on registry client "+current.Name, err)
 	}
 
 	// Ensure finalizer for cleanup on deletion
@@ -262,7 +261,7 @@ func (r *NifiRegistryClientReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	// Push any changes
 	if instance, err = r.updateAndFetchLatest(ctx, instance); err != nil {
-		return RequeueWithError(r.Log, "failed to update NifiRegistryClient "+instance.Name, err)
+		return RequeueWithError(r.Log, "failed to update NifiRegistryClient "+current.Name, err)
 	}
 
 	r.Recorder.Event(instance, corev1.EventTypeNormal, "Reconciled",
@@ -276,8 +275,13 @@ func (r *NifiRegistryClientReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *NifiRegistryClientReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	logCtr, err := GetLogConstructor(mgr, &v1alpha1.NifiRegistryClient{})
+	if err != nil {
+		return err
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.NifiRegistryClient{}).
+		WithLogConstructor(logCtr).
 		Complete(r)
 }
 

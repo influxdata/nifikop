@@ -1,5 +1,5 @@
 ---
-id: 2020-06-30-secured_nifi_cluster_on_gcp_with_external_dns
+slug: 2020-06-30-secured_nifi_cluster_on_gcp_with_external_dns
 title: Secured NiFi cluster with NiFiKop with external dns on the Google Cloud Platform
 author: Alexandre Guitton
 author_title: Alexandre Guitton
@@ -129,7 +129,7 @@ In the `cert-manager` namespace we deployed a `cert-manager` stack in a cluster-
 
 :::note
 in this post, we will let `let's encrypt` act as certificate authority. 
-For more informations check [documentation page](/nifikop/docs/3_tasks/2_security/1_ssl#using-an-existing-issuer)
+For more informations check [documentation page](/nifikop/docs/3_manage_nifi/1_manage_clusters/1_deploy_cluster/4_ssl_configuration#using-an-existing-issuer)
 :::
 
 ```console

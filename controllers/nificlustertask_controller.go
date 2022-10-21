@@ -36,7 +36,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -98,18 +97,11 @@ func (r *NifiClusterTaskReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err != nil {
 		switch errors.Cause(err).(type) {
 		case errorfactory.NifiClusterNotReady, errorfactory.ResourceNotReady:
-			return reconcile.Result{
-				RequeueAfter: intervalNotReady,
-			}, nil
+			return RequeueAfter(intervalNotReady)
 		case errorfactory.NifiClusterTaskRunning:
-			return reconcile.Result{
-				RequeueAfter: intervalRunning,
-			}, nil
+			return RequeueAfter(intervalRunning)
 		case errorfactory.NifiClusterTaskTimeout, errorfactory.NifiClusterTaskFailure:
-
-			return reconcile.Result{
-				RequeueAfter: intervalTimeout,
-			}, nil
+			return RequeueAfter(intervalTimeout)
 		default:
 			return RequeueWithError(r.Log, err.Error(), err)
 		}
@@ -135,17 +127,11 @@ func (r *NifiClusterTaskReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err != nil {
 		switch errors.Cause(err).(type) {
 		case errorfactory.NifiClusterNotReady:
-			return reconcile.Result{
-				RequeueAfter: intervalNotReady,
-			}, nil
+			return RequeueAfter(intervalNotReady)
 		case errorfactory.NifiClusterTaskRunning:
-			return reconcile.Result{
-				RequeueAfter: intervalRunning,
-			}, nil
+			return RequeueAfter(intervalRunning)
 		case errorfactory.NifiClusterTaskTimeout, errorfactory.NifiClusterTaskFailure:
-			return reconcile.Result{
-				RequeueAfter: intervalTimeout,
-			}, nil
+			return RequeueAfter(intervalTimeout)
 		default:
 			return RequeueWithError(r.Log, err.Error(), err)
 		}
@@ -168,10 +154,15 @@ func (r *NifiClusterTaskReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *NifiClusterTaskReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	logCtr, err := GetLogConstructor(mgr, &v1alpha1.NifiCluster{})
+	if err != nil {
+		return err
+	}
 	builder := ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.NifiCluster{})
+		For(&v1alpha1.NifiCluster{}).
+		WithLogConstructor(logCtr)
 
-	err := builder.WithEventFilter(
+	err = builder.WithEventFilter(
 		predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
 				object, err := meta.Accessor(e.ObjectNew)
