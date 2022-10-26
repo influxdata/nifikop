@@ -1952,6 +1952,10 @@ spec:
                           to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                         type: object
                     type: object
+                  restartPolicy:
+                    description: restartPolicy specifies the restart policy for the
+                      node
+                    type: string
                   runAsUser:
                     description: RunAsUser define the id of the user to run in the
                       Nifi image
