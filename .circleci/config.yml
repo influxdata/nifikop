@@ -106,8 +106,6 @@ orbs:
           - run:
               name: Log into gcloud service account
               command: |
-                echo "${PATH}"
-                ls -l /usr/local/bin/gcloud
                 if [ "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" != "" ] ; then
                   echo "${GCLOUD_SERVICE_ACCOUNT_KEY}" > /tmp/gcloud.json
                   gcloud auth activate-service-account "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" --key-file /tmp/gcloud.json --quiet
