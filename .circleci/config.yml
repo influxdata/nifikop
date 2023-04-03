@@ -96,13 +96,26 @@ orbs:
               paths:
                 - << parameters.operatorDir >>/build/_output
                 - << parameters.operatorDir >>/vendor
+          - run:
+              name: Install gcloud CLI 
+              command: |
+                curl -Lo ./gcloud https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-424.0.0-linux-x86_64.tar.gz
+                chmod +x ./gcloud
+          - run:
+              name: Log into gcloud service account
+              command: |
+                if [ "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" != "" ] ; then
+                  echo "${GCLOUD_SERVICE_ACCOUNT_KEY}" > /tmp/gcloud.json
+                  ./gcloud auth activate-service-account "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" --key-file /tmp/gcloud.json --quiet
+                  rm -f /tmp/gcloud.json
+                  gcloud auth configure-docker us-docker.pkg.dev
+                fi
           - deploy:
-              name: Push image to InfluxData's Quay repo
+              name: Push image to InfluxData's GAR repo
               command: |
                 if [[ $(echo "$CIRCLE_BRANCH" | grep -c "pull") -gt 0 ]]; then
-                  echo "This is a PR, we don't push to Quay."
+                  echo "This is a PR, we don't push to GAR."
                 else
-                  docker login -u=$QUAY_USER -p=$QUAY_PASS quay.io
                   make docker-push
                 fi
           - save_cache:
