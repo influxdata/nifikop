@@ -103,6 +103,7 @@ orbs:
                 tar -xzf gcloud.tar.gz
                 ./google-cloud-sdk/install.sh --quiet
                 ln -s "${PWD}/google-cloud-sdk/bin/gcloud" /usr/local/bin/gcloud
+                gcloud components install docker-credential-gcr
                 if [ "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" != "" ] ; then
                   echo "${GCLOUD_SERVICE_ACCOUNT_KEY}" > /tmp/gcloud.json
                   gcloud auth activate-service-account "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" --key-file /tmp/gcloud.json --quiet
