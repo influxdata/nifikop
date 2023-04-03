@@ -103,18 +103,12 @@ orbs:
                 tar -xzf gcloud.tar.gz
                 ./google-cloud-sdk/install.sh --quiet
                 ln -s "${PWD}/google-cloud-sdk/bin/gcloud" /usr/local/bin/gcloud
-          - run:
-              name: Log into gcloud service account
-              command: |
                 if [ "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" != "" ] ; then
                   echo "${GCLOUD_SERVICE_ACCOUNT_KEY}" > /tmp/gcloud.json
                   gcloud auth activate-service-account "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" --key-file /tmp/gcloud.json --quiet
                   rm -f /tmp/gcloud.json
                   gcloud auth configure-docker us-docker.pkg.dev --quiet
                 fi
-          - deploy:
-              name: Push image to InfluxData's GAR repo
-              command: |
                 # if [[ $(echo "$CIRCLE_BRANCH" | grep -c "pull") -gt 0 ]]; then
                 #   echo "This is a PR, we don't push to GAR."
                 # else
