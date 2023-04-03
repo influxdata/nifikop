@@ -117,11 +117,11 @@ orbs:
           - deploy:
               name: Push image to InfluxData's GAR repo
               command: |
-                if [[ $(echo "$CIRCLE_BRANCH" | grep -c "pull") -gt 0 ]]; then
-                  echo "This is a PR, we don't push to GAR."
-                else
+                # if [[ $(echo "$CIRCLE_BRANCH" | grep -c "pull") -gt 0 ]]; then
+                #   echo "This is a PR, we don't push to GAR."
+                # else
                   make docker-push
-                fi
+                # fi
           - save_cache:
               name: Save build artifacts in cache
               key: << parameters.operatorName >>-build-{{ .Branch }}-{{ checksum "go.sum" }}-{{ .Environment.CACHE_VERSION }}
