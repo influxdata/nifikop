@@ -96,13 +96,33 @@ orbs:
               paths:
                 - << parameters.operatorDir >>/build/_output
                 - << parameters.operatorDir >>/vendor
-          - deploy:
-              name: Push image to InfluxData's Quay repo
+          - run:
+              name: Install gcloud CLI 
+              command: |
+                EXPECTED_CHECKSUM=b6aba3ed40128b98ff74cafa3d26edb7bbb3530db7661aac26bd2fd1147b17b0
+                GCLOUD_TAR_FILE=gcloud.tar.gz
+                curl -Lso "${GCLOUD_TAR_FILE}" https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-424.0.0-linux-x86_64.tar.gz
+                echo "${EXPECTED_CHECKSUM} ${GCLOUD_TAR_FILE}" | sha256sum --check -- || { echo "Checksum problem!"; exit 1; }
+                tar -xzf "${GCLOUD_TAR_FILE}" 
+                ./google-cloud-sdk/install.sh --quiet
+                ln -s "${PWD}/google-cloud-sdk/bin/gcloud" /usr/local/bin/gcloud
+                gcloud components install docker-credential-gcr --quiet
+                ln -s "${PWD}/google-cloud-sdk/bin/docker-credential-gcloud" /usr/local/bin/docker-credential-gcloud
+          - run:
+              name: Log into gcloud CLI
+              command: |
+                if [ "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" != "" ] ; then
+                  echo "${GCLOUD_SERVICE_ACCOUNT_KEY}" > /tmp/gcloud.json
+                  gcloud auth activate-service-account "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" --key-file /tmp/gcloud.json --quiet
+                  rm -f /tmp/gcloud.json
+                  gcloud auth configure-docker us-docker.pkg.dev --quiet
+                fi
+          - run:
+              name: Push docker image to GAR
               command: |
                 if [[ $(echo "$CIRCLE_BRANCH" | grep -c "pull") -gt 0 ]]; then
-                  echo "This is a PR, we don't push to Quay."
+                  echo "This is a PR, we don't push to GAR."
                 else
-                  docker login -u=$QUAY_USER -p=$QUAY_PASS quay.io
                   make docker-push
                 fi
           - save_cache:
