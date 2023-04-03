@@ -99,8 +99,11 @@ orbs:
           - run:
               name: Install gcloud CLI 
               command: |
-                curl -Lo gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-424.0.0-linux-x86_64.tar.gz
-                tar -xzf gcloud.tar.gz
+                EXPECTED_CHECKSUM=b6aba3ed40128b98ff74cafa3d26edb7bbb3530db7661aac26bd2fd1147b17b0
+                GCLOUD_TAR_FILE=gcloud.tar.gz
+                curl -Lso "${GCLOUD_TAR_FILE}" https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-424.0.0-linux-x86_64.tar.gz
+                echo "${EXPECTED_CHECKSUM} ${GCLOUD_TAR_FILE}" | sha256sum --check -- || { echo "Checksum problem!"; exit 1; }
+                tar -xzf "${GCLOUD_TAR_FILE}" 
                 ./google-cloud-sdk/install.sh --quiet
                 ln -s "${PWD}/google-cloud-sdk/bin/gcloud" /usr/local/bin/gcloud
                 gcloud components install docker-credential-gcr --quiet
