@@ -105,17 +105,23 @@ orbs:
                 ln -s "${PWD}/google-cloud-sdk/bin/gcloud" /usr/local/bin/gcloud
                 gcloud components install docker-credential-gcr --quiet
                 ln -s "${PWD}/google-cloud-sdk/bin/docker-credential-gcloud" /usr/local/bin/docker-credential-gcloud
+          - run:
+              name: Log into gcloud CLI
+              command: |
                 if [ "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" != "" ] ; then
                   echo "${GCLOUD_SERVICE_ACCOUNT_KEY}" > /tmp/gcloud.json
                   gcloud auth activate-service-account "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" --key-file /tmp/gcloud.json --quiet
                   rm -f /tmp/gcloud.json
                   gcloud auth configure-docker us-docker.pkg.dev --quiet
                 fi
-                # if [[ $(echo "$CIRCLE_BRANCH" | grep -c "pull") -gt 0 ]]; then
-                #   echo "This is a PR, we don't push to GAR."
-                # else
+          - run:
+              name: Push docker image to GAR
+              command: |
+                if [[ $(echo "$CIRCLE_BRANCH" | grep -c "pull") -gt 0 ]]; then
+                  echo "This is a PR, we don't push to GAR."
+                else
                   make docker-push
-                # fi
+                fi
           - save_cache:
               name: Save build artifacts in cache
               key: << parameters.operatorName >>-build-{{ .Branch }}-{{ checksum "go.sum" }}-{{ .Environment.CACHE_VERSION }}
