@@ -53,11 +53,12 @@ orbs:
                 curl -Lo gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-424.0.0-linux-x86_64.tar.gz
                 tar -xzf gcloud.tar.gz
                 ./google-cloud-sdk/install.sh --quiet
-                ln -s google-cloud-sdk/bin/gcloud /usr/bin/gcloud
+                ln -s google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
           - run:
               name: Log into gcloud service account
               command: |
                 echo "${PATH}"
+                ls -l /usr/local/bin/gcloud
                 if [ "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" != "" ] ; then
                   echo "${GCLOUD_SERVICE_ACCOUNT_KEY}" > /tmp/gcloud.json
                   gcloud auth activate-service-account "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" --key-file /tmp/gcloud.json --quiet
