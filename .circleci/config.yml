@@ -101,6 +101,9 @@ orbs:
               command: |
                 curl -Lo ./gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-424.0.0-linux-x86_64.tar.gz
                 tar -xzf gcloud.tar.gz
+                mv ./google-cloud-sdk/bin/gcloud ./gcloud
+                rm -rf ./google-cloud-sdk
+                rm -rf ./gcloud.tar.gz
                 chmod +x ./gcloud
           - run:
               name: Log into gcloud service account
