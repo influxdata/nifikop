@@ -53,7 +53,7 @@ orbs:
                 curl -Lo gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-424.0.0-linux-x86_64.tar.gz
                 tar -xzf gcloud.tar.gz
                 ./google-cloud-sdk/install.sh --quiet
-                ln -s "${PWD}/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
+                ln -s "${PWD}/google-cloud-sdk/bin/gcloud" /usr/local/bin/gcloud
           - run:
               name: Log into gcloud service account
               command: |
