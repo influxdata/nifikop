@@ -101,7 +101,8 @@ orbs:
               command: |
                 curl -Lo gcloud.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-424.0.0-linux-x86_64.tar.gz
                 tar -xzf gcloud.tar.gz
-                ./google-cloud-sdk/install.sh --quiet --path-update true
+                ./google-cloud-sdk/install.sh --quiet
+                ln -s google-cloud-sdk/bin/gcloud /usr/bin/gcloud
           - run:
               name: Log into gcloud service account
               command: |
@@ -109,7 +110,7 @@ orbs:
                   echo "${GCLOUD_SERVICE_ACCOUNT_KEY}" > /tmp/gcloud.json
                   gcloud auth activate-service-account "${GCLOUD_SERVICE_ACCOUNT_EMAIL}" --key-file /tmp/gcloud.json --quiet
                   rm -f /tmp/gcloud.json
-                  gcloud auth configure-docker us-docker.pkg.dev
+                  gcloud auth configure-docker us-docker.pkg.dev --quiet
                 fi
           - deploy:
               name: Push image to InfluxData's GAR repo
